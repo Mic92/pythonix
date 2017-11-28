@@ -74,12 +74,19 @@ static PyObject * nixValueToPythonObject(nix::EvalState &state, nix::Value &v, n
     }
 }
 
+const static int envSize = 32768;
+
 static PyObject * eval(PyObject *self, PyObject *args) {
     const char *expression;
 
     nix::Strings storePath;
     nix::EvalState state(storePath, nix::openStore());
-    nix::StaticEnv staticEnv(false, 0);
+
+    auto env = &state.allocEnv(envSize);
+    env->up = &state.baseEnv;
+
+    nix::StaticEnv staticEnv(false, &state.staticBaseEnv);
+    staticEnv.vars.clear();
 
     if (!PyArg_ParseTuple(args, "s", &expression)) {
         return NULL;
@@ -87,7 +94,7 @@ static PyObject * eval(PyObject *self, PyObject *args) {
 
     auto e = state.parseExprFromString(expression, ".", staticEnv);
     nix::Value v;
-    state.eval(e, v);
+    e->eval(state, *env, v);
 
     state.forceValueDeep(v);
     nix::PathSet context;

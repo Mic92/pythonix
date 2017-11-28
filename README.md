@@ -21,7 +21,11 @@ usage:
 ```console
 $ cd build/src
 $ python3
-python3> import nix
-python3> nix.eval('(1 + 1)')
+>>> import nix
+>>> nix.eval('(1 + 1)')
 2
+>>> nix.eval("builtins.currentSystem")
+'x86_64-linux'
+>>> with import <nixpkgs> {}; lib.nixpkgsVersion
+'18.03.git.15c484a965a'
 ```
