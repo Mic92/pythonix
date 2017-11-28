@@ -26,6 +26,6 @@ $ python3
 2
 >>> nix.eval("builtins.currentSystem")
 'x86_64-linux'
->>> with import <nixpkgs> {}; lib.nixpkgsVersion
+>>> nix.eval("with import <nixpkgs> {}; lib.nixpkgsVersion")
 '18.03.git.15c484a965a'
 ```
