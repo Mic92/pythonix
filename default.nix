@@ -1,6 +1,6 @@
 with import <nixpkgs> {};
 stdenv.mkDerivation {
-  name = "env";
+  name = "pythonix";
   buildInputs = [
     bashInteractive
     nixUnstable
