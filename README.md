@@ -1,8 +1,8 @@
 # Python3 bindings for nix
 
-status: WIP
+status: works for me
 
-build:
+## Build from source
 
 ```console
 $ meson . build
@@ -15,8 +15,7 @@ or:
 $ nix-build
 ```
 
-
-usage:
+## Usage
 
 ```console
 $ cd build/src
