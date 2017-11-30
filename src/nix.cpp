@@ -2,7 +2,16 @@
 #include <eval.hh>
 #include <store-api.hh>
 #include <Python.h>
-#include <iostream>
+
+static PyObject *NixError;
+
+struct PyObjectDeleter {
+    void operator () (PyObject* const obj) {
+        Py_DECREF (obj);
+    }
+};
+
+typedef std::unique_ptr<PyObject, PyObjectDeleter> PyObjPtr;
 
 static PyObject * nixValueToPythonObject(nix::EvalState &state, nix::Value &v, nix::PathSet &context) {
     switch (v.type) {
@@ -28,9 +37,9 @@ static PyObject * nixValueToPythonObject(nix::EvalState &state, nix::Value &v, n
         case nix::tAttrs: {
             auto i = v.attrs->find(state.sOutPath);
             if (i == v.attrs->end()) {
-                PyObject* dict = PyDict_New();
-                if (dict == nullptr) {
-                    return dict;
+                PyObjPtr dict(PyDict_New());
+                if (!dict) {
+                    return (PyObject *) nullptr;
                 }
 
                 nix::StringSet names;
@@ -42,24 +51,31 @@ static PyObject * nixValueToPythonObject(nix::EvalState &state, nix::Value &v, n
                     nix::Attr & a(*v.attrs->find(state.symbols.create(j)));
 
                     auto value = nixValueToPythonObject(state, *a.value, context);
-                    PyDict_SetItemString(dict, j.c_str(), value);
+                    if (value == nullptr) {
+                        return nullptr;
+                    }
+                    PyDict_SetItemString(dict.get(), j.c_str(), value);
                 }
-                return dict;
+                return dict.release();
             } else {
                 return nixValueToPythonObject(state, *i->value, context);
             }
         }
 
         case nix::tList1: case nix::tList2: case nix::tListN: {
-            auto list = PyList_New(v.listSize());
-            if (list == nullptr) {
-                return list;
+            PyObjPtr list(PyList_New(v.listSize()));
+            if (!list) {
+                return (PyObject *) nullptr;
             }
 
             for (unsigned int n = 0; n < v.listSize(); ++n) {
-                PyList_SET_ITEM(list, n, nixValueToPythonObject(state, *v.listElems()[n], context));
+                auto value = nixValueToPythonObject(state, *v.listElems()[n], context);
+                if (value == nullptr) {
+                    return nullptr;
+                }
+                PyList_SET_ITEM(list.get(), n, value);
             }
-            return list;
+            return list.release();
         }
 
         case nix::tExternal:
@@ -69,16 +85,14 @@ static PyObject * nixValueToPythonObject(nix::EvalState &state, nix::Value &v, n
             return PyFloat_FromDouble(v.fpoint);
 
         default:
-            // TODO exception
-            return PyUnicode_FromFormat("cannot convert %s to JSON", showType(v));
+            PyErr_Format(NixError, "cannot convert nix type '%s' to a python object", showType(v));
+            return nullptr;
     }
 }
 
 const static int envSize = 32768;
 
-static PyObject * eval(PyObject *self, PyObject *args) {
-    const char *expression;
-
+static PyObject* eval(const char* expression) {
     nix::Strings storePath;
     nix::EvalState state(storePath, nix::openStore());
 
@@ -87,10 +101,6 @@ static PyObject * eval(PyObject *self, PyObject *args) {
 
     nix::StaticEnv staticEnv(false, &state.staticBaseEnv);
     staticEnv.vars.clear();
-
-    if (!PyArg_ParseTuple(args, "s", &expression)) {
-        return NULL;
-    }
 
     auto e = state.parseExprFromString(expression, ".", staticEnv);
     nix::Value v;
@@ -102,8 +112,32 @@ static PyObject * eval(PyObject *self, PyObject *args) {
     return nixValueToPythonObject(state, v, context);
 }
 
+
+static PyObject * nixEval(PyObject *self, PyObject *args) {
+    const char *expression;
+
+    if (!PyArg_ParseTuple(args, "s", &expression)) {
+        return NULL;
+    }
+
+    try {
+      return eval(expression);
+    } catch (nix::Error & e) {
+      PyErr_Format(NixError, "%s", e.what());
+
+      return nullptr;
+    } catch (...) {
+      std::exception_ptr p = std::current_exception();
+      auto name = p ? p.__cxa_exception_type()->name() : "null";
+
+      PyErr_Format(NixError, "unexpected C++ exception: '%s'", name);
+
+      return nullptr;
+    }
+}
+
 static PyMethodDef NixMethods[] = {
-    {"eval", eval, METH_VARARGS, "Eval nix expression"},
+    {"eval", nixEval, METH_VARARGS, "Eval nix expression"},
     {NULL, NULL, 0, NULL}
 };
 
@@ -118,14 +152,29 @@ static struct PyModuleDef nixmodule = {
 
 extern "C" {
     PyMODINIT_FUNC PyInit_nix(void) {
-        PyObject *m;
         nix::initGC();
 
-        m = PyModule_Create(&nixmodule);
-        if (m == NULL) {
-            return NULL;
+        PyObjPtr m (PyModule_Create(&nixmodule));
+
+        if (!m) {
+            return nullptr;
         }
 
-        return m;
+        NixError = PyErr_NewExceptionWithDoc(
+            "nix.NixError", /* char *name */
+            "Base exception class for the nix module.", /* char *doc */
+            NULL, /* PyObject *base */
+            NULL /* PyObject *dict */
+        );
+
+        if (!NixError) {
+            return nullptr;
+        }
+
+        if (PyModule_AddObject(m.get(), "NixRef", NixError) == -1) {
+          return nullptr;
+        }
+
+        return m.release();
     }
 }
