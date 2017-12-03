@@ -21,8 +21,8 @@ $ nix-build
 $ cd build/src
 $ python3
 >>> import nix
->>> nix.eval('(1 + 1)')
-2
+>>> nix.eval('(1 + a)', vars=dict(a=2))
+3
 >>> nix.eval("builtins.currentSystem")
 'x86_64-linux'
 >>> nix.eval("with import <nixpkgs> {}; lib.nixpkgsVersion")

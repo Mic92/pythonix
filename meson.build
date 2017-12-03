@@ -1,7 +1,6 @@
 project('python-nix', 'cpp',
   version : '1.0.0',
   license : 'LGPL-2.0',
-  default_options : ['cpp_std=c++14']
 )
 
 python_mod = import('python3')
