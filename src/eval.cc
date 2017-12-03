@@ -11,7 +11,7 @@ static PyObject *_eval(const char *expression, PyObject *vars) {
   nix::Strings storePath;
   nix::EvalState state(storePath, nix::openStore());
 
-  nix::Env *env;
+  nix::Env *env = nullptr;
   auto staticEnv = pythonToNixEnv(state, vars, &env);
   if (!staticEnv) {
     return nullptr;
@@ -28,19 +28,14 @@ static PyObject *_eval(const char *expression, PyObject *vars) {
 }
 
 PyObject *eval(PyObject *self, PyObject *args, PyObject *keywds) {
-  const char *expression;
-  PyObject *vars;
+  const char *expression = nullptr;
+  PyObject *vars = nullptr;
 
   const char *kwlist[] = {"expression", "vars", nullptr};
 
-  if (!PyArg_ParseTupleAndKeywords(args, keywds, "sO!",
+  if (!PyArg_ParseTupleAndKeywords(args, keywds, "s|O!",
                                    const_cast<char **>(kwlist), &expression,
                                    &PyDict_Type, &vars)) {
-    return nullptr;
-  }
-
-  if (!PyDict_Check(vars)) {
-    printf("expect a dict!\n");
     return nullptr;
   }
 

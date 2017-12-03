@@ -16,7 +16,7 @@ static const char *checkNullByte(const char *str, const Py_ssize_t size) {
 }
 
 static const char *checkAttrKey(PyObject *obj) {
-  Py_ssize_t size;
+  Py_ssize_t size = 0;
 
   if (!PyUnicode_Check(obj)) {
     PyObjPtr typeName(PyObject_Str(PyObject_Type(obj)));
@@ -42,7 +42,7 @@ static const char *checkAttrKey(PyObject *obj) {
 
 static std::optional<nix::ValueMap> dictToAttrSet(PyObject *obj,
                                                   nix::EvalState &state) {
-  PyObject *key, *val;
+  PyObject *key = nullptr, *val = nullptr;
   Py_ssize_t pos = 0;
 
   nix::ValueMap attrs;
@@ -123,12 +123,16 @@ nix::Value *pythonToNixValue(nix::EvalState &state, PyObject *obj) {
 std::optional<nix::StaticEnv> pythonToNixEnv(nix::EvalState &state,
                                              PyObject *vars, nix::Env **env) {
   Py_ssize_t pos = 0;
-  PyObject *key, *val;
+  PyObject *key = nullptr, *val = nullptr;
 
-  *env = &state.allocEnv(PyDict_Size(vars));
+  *env = &state.allocEnv(vars ? PyDict_Size(vars) : 0);
   (*env)->up = &state.baseEnv;
 
   nix::StaticEnv staticEnv(false, &state.staticBaseEnv);
+
+  if (!vars) {
+    return staticEnv;
+  }
 
   auto displ = 0;
   while (PyDict_Next(vars, &pos, &key, &val)) {
