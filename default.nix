@@ -1,13 +1,20 @@
-with import <nixpkgs> {};
-stdenv.mkDerivation {
+{
+  pkgs ? (import <nixpkgs> {}).pkgs
+}:
+
+with pkgs;
+
+let
+  filterMesonBuild = dir: builtins.filterSource
+    (path: type: type != "directory" || baseNameOf path != "build") dir;
+
+in stdenv.mkDerivation {
   name = "pythonix";
-  buildInputs = [
-    bashInteractive
-    nixUnstable
-    meson
-    pkgconfig
-    ninja
-    gcc7
+
+  nativeBuildInputs = [
+    ninja meson pkgconfig gcc7
   ];
-  src = ./.;
+
+  buildInputs = [ nixUnstable ];
+  src = filterMesonBuild ./.;
 }
