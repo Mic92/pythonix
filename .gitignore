@@ -1,0 +1,10 @@
+*.rej
+*.orig
+*.a
+*.o
+*~
+*.swp
+*.patch
+*.dat
+/build
+.gdb_history
