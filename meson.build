@@ -1,5 +1,5 @@
 project('python-nix', 'cpp',
-  version : '1.0.0',
+  version : '0.1.0',
   license : 'LGPL-2.0',
 )
 
