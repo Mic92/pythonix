@@ -82,7 +82,7 @@ PyObject *nixToPythonObject(nix::EvalState &state, nix::Value &v,
 
   default:
     PyErr_Format(NixError, "cannot convert nix type '%s' to a python object",
-                 showType(v));
+                 showType(v).c_str());
     return nullptr;
   }
 }
