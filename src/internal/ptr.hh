@@ -10,4 +10,4 @@ struct PyObjectDeleter {
 };
 
 typedef std::unique_ptr<PyObject, PyObjectDeleter> PyObjPtr;
-}
+} // namespace pythonnix

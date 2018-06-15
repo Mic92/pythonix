@@ -114,6 +114,7 @@ nix::Value *pythonToNixValue(nix::EvalState &state, PyObject *obj) {
     if (!attrs) {
       return nullptr;
     }
+    state.mkAttrs(*v, attrs->size());
     for (auto &attr : *attrs) {
       v->attrs->push_back(nix::Attr(attr.first, attr.second));
     }
