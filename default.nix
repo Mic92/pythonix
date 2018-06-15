@@ -15,6 +15,10 @@ in stdenv.mkDerivation {
     ninja meson pkgconfig gcc7
   ];
 
+  checkPhase = ''
+    ninja test
+  '';
+
   buildInputs = [ nixUnstable boost ];
   src = filterMesonBuild ./.;
 }
