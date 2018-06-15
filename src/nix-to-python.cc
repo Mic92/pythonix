@@ -84,4 +84,4 @@ PyObject *nixToPythonObject(nix::EvalState &state, nix::Value &v,
     return nullptr;
   }
 }
-}
+} // namespace pythonnix

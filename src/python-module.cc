@@ -1,3 +1,4 @@
+
 #include "internal/eval.hh"
 #include "internal/ptr.hh"
 
@@ -36,7 +37,7 @@ extern "C" _public_ PyObject *PyInit_nix(void) {
       "Base exception class for the nix module.", /* char *doc */
       NULL,                                       /* PyObject *base */
       NULL                                        /* PyObject *dict */
-      );
+  );
 
   if (!NixError) {
     return nullptr;

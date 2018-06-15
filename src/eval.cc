@@ -50,4 +50,4 @@ PyObject *eval(PyObject *self, PyObject *args, PyObject *keywds) {
     return PyErr_Format(NixError, "unexpected C++ exception: '%s'", name);
   }
 }
-}
+} // namespace pythonnix

@@ -2,6 +2,8 @@
 #include "internal/errors.hh"
 #include "internal/ptr.hh"
 
+#include <optional>
+
 namespace pythonnix {
 
 static const char *checkNullByte(const char *str, const Py_ssize_t size) {
@@ -151,4 +153,4 @@ std::optional<nix::StaticEnv> pythonToNixEnv(nix::EvalState &state,
 
   return staticEnv;
 }
-}
+} // namespace pythonnix
