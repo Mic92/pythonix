@@ -1,3 +1,4 @@
+#include <Python.h>
 
 #include "internal/eval.hh"
 #include "internal/ptr.hh"

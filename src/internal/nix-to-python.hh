@@ -1,8 +1,8 @@
 #pragma once
 
-#include <nix/config.h>
-
 #include <Python.h>
+
+#include <nix/config.h>
 #include <eval.hh>
 
 namespace pythonnix {

@@ -1,3 +1,5 @@
+#include <Python.h>
+
 #include "internal/nix-to-python.hh"
 #include "internal/errors.hh"
 #include "internal/ptr.hh"
