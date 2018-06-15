@@ -1,6 +1,6 @@
 # Python3 bindings for nix
 
-status: works for me
+[![Build Status](https://travis-ci.org/Mic92/pythonix.svg?branch=master)](https://travis-ci.org/Mic92/pythonix)
 
 ## Build from source
 
