@@ -2,10 +2,19 @@
 #include "internal/errors.hh"
 #include "internal/nix-to-python.hh"
 #include "internal/python-to-nix.hh"
+#include <Python.h>
 
+#include <cxxabi.h>
 #include <store-api.hh>
 
 namespace pythonnix {
+
+const char *currentExceptionTypeName() {
+  int status;
+  auto res = abi::__cxa_demangle(abi::__cxa_current_exception_type()->name(), 0,
+                                 0, &status);
+  return res ? res : "(null)";
+}
 
 static PyObject *_eval(const char *expression, PyObject *vars) {
   nix::Strings storePath;
@@ -44,10 +53,8 @@ PyObject *eval(PyObject *self, PyObject *args, PyObject *keywds) {
   } catch (nix::Error &e) {
     return PyErr_Format(NixError, "%s", e.what());
   } catch (...) {
-    std::exception_ptr p = std::current_exception();
-    auto name = p ? p.__cxa_exception_type()->name() : "null";
-
-    return PyErr_Format(NixError, "unexpected C++ exception: '%s'", name);
+    return PyErr_Format(NixError, "unexpected C++ exception: '%s'",
+                        currentExceptionTypeName());
   }
 }
 } // namespace pythonnix
