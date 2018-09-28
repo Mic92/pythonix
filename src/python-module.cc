@@ -44,7 +44,7 @@ extern "C" _public_ PyObject *PyInit_nix(void) {
     return nullptr;
   }
 
-  if (PyModule_AddObject(m.get(), "NixRef", NixError) == -1) {
+  if (PyModule_AddObject(m.get(), "NixError", NixError) == -1) {
     return nullptr;
   }
 
