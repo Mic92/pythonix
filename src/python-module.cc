@@ -1,6 +1,7 @@
 #include <Python.h>
 
 #include "internal/eval.hh"
+#include "internal/expr.hh"
 #include "internal/ptr.hh"
 
 #include <nix/config.h>
@@ -13,10 +14,11 @@ namespace pythonnix {
 
 PyObject *NixError = nullptr;
 
-static PyMethodDef NixMethods[] = {{"eval", (PyCFunction)eval,
-                                    METH_VARARGS | METH_KEYWORDS,
-                                    "Eval nix expression"},
-                                   {NULL, NULL, 0, NULL}};
+static PyMethodDef NixMethods[] = {
+   {"eval", (PyCFunction)eval, METH_VARARGS | METH_KEYWORDS, "Eval nix expression"},
+   {"ast", (PyCFunction)expr, METH_VARARGS | METH_KEYWORDS, "Expression AST from nix expression"},
+   {NULL, NULL, 0, NULL}
+};
 
 static struct PyModuleDef nixmodule = {
     PyModuleDef_HEAD_INIT, "nix", "Nix expression bindings",

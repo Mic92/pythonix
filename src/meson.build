@@ -2,6 +2,7 @@ src = [
   'nix-to-python.cc',
   'python-to-nix.cc',
   'eval.cc',
+  'expr.cc',
   'python-module.cc',
 ]
 

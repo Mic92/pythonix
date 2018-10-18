@@ -27,4 +27,6 @@ $ python3
 'x86_64-linux'
 >>> nix.eval("with import <nixpkgs> {}; lib.nixpkgsVersion")
 '18.03.git.15c484a965a'
+>>> nix.ast('rec { a = 1; }')
+('ATTRS', True, {'a': (('INT', 1), False, ('(string)', 1, 6))})
 ```
