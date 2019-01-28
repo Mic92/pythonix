@@ -82,7 +82,7 @@ nix::Value *pythonToNixValue(nix::EvalState &state, PyObject *obj) {
     nix::mkString(*v, str);
   } else if (PyUnicode_Check(obj)) {
     Py_ssize_t size;
-    char *utf8 = PyUnicode_AsUTF8AndSize(obj, &size);
+    const char *utf8 = PyUnicode_AsUTF8AndSize(obj, &size);
     auto str = checkNullByte(utf8, size);
     if (!str) {
       return nullptr;
