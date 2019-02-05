@@ -19,6 +19,6 @@ in stdenv.mkDerivation {
     ninja test
   '';
 
-  buildInputs = [ nix boost ];
+  buildInputs = [ nix boost python3 ];
   src = filterMesonBuild ./.;
 }
