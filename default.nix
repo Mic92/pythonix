@@ -7,18 +7,22 @@ with pkgs;
 let
   filterMesonBuild = dir: builtins.filterSource
     (path: type: type != "directory" || baseNameOf path != "build") dir;
-
-in stdenv.mkDerivation {
+  python = python3;
+in python.pkgs.buildPythonPackage rec {
   name = "pythonix";
+  format = "other";
 
   nativeBuildInputs = [
-    ninja meson pkgconfig gcc7
+    ninja
+    (meson.override { python3 = python3; })
+    pkgconfig
+    gcc_latest
   ];
 
   checkPhase = ''
     ninja test
   '';
 
-  buildInputs = [ nix boost python3 ];
+  buildInputs = [ nix boost ];
   src = filterMesonBuild ./.;
 }
