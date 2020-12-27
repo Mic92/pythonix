@@ -19,8 +19,9 @@ in python.pkgs.buildPythonPackage rec {
     gcc_latest
   ];
 
-  checkPhase = ''
-    ninja test
+  doCheck = true;
+  installCheckPhase = ''
+    PYTHONPATH=$out/${python.sitePackages} NIX_STATE_DIR=$TMPDIR/var ninja test
   '';
 
   buildInputs = [ nix boost ];
