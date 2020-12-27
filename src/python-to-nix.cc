@@ -1,8 +1,8 @@
 #include <Python.h>
 
-#include "internal/python-to-nix.hh"
 #include "internal/errors.hh"
 #include "internal/ptr.hh"
+#include "internal/python-to-nix.hh"
 
 #include <optional>
 

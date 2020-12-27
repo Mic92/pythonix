@@ -50,4 +50,4 @@ extern "C" _public_ PyObject *PyInit_nix(void) {
 
   return m.release();
 }
-}
+} // namespace pythonnix
