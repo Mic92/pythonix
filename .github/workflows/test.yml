@@ -14,3 +14,11 @@ jobs:
         extra_nix_config: |
           experimental-features = nix-command flakes
     - run: nix build -L
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - uses: DoozyX/clang-format-lint-action@v0.11
+      with:
+        source: 'src'
+        extensions: 'hh,cc'
