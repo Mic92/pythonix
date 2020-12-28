@@ -1,8 +1,8 @@
 #pragma once
 
 #include <Python.h>
-
 #include <nix/config.h>
+
 #include <eval.hh>
 #include <optional>
 
