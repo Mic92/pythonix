@@ -8,27 +8,27 @@ namespace pythonnix {
 
 PyObject *nixToPythonObject(nix::EvalState &state, nix::Value &v,
                             nix::PathSet &context) {
-  switch (v.type) {
-  case nix::tInt:
+  switch (v.type()) {
+  case nix::nInt:
     return PyLong_FromLong(v.integer);
 
-  case nix::tBool:
+  case nix::nBool:
     if (v.boolean) {
       Py_RETURN_TRUE;
     } else {
       Py_RETURN_FALSE;
     }
-  case nix::tString:
+  case nix::nString:
     copyContext(v, context);
     return PyUnicode_FromString(v.string.s);
 
-  case nix::tPath:
+  case nix::nPath:
     return PyUnicode_FromString(state.copyPathToStore(context, v.path).c_str());
 
-  case nix::tNull:
+  case nix::nNull:
     Py_RETURN_NONE;
 
-  case nix::tAttrs: {
+  case nix::nAttrs: {
     auto i = v.attrs->find(state.sOutPath);
     if (i == v.attrs->end()) {
       PyObjPtr dict(PyDict_New());
@@ -56,9 +56,7 @@ PyObject *nixToPythonObject(nix::EvalState &state, nix::Value &v,
     }
   }
 
-  case nix::tList1:
-  case nix::tList2:
-  case nix::tListN: {
+  case nix::nList: {
     PyObjPtr list(PyList_New(v.listSize()));
     if (!list) {
       return (PyObject *)nullptr;
@@ -74,10 +72,16 @@ PyObject *nixToPythonObject(nix::EvalState &state, nix::Value &v,
     return list.release();
   }
 
-  case nix::tExternal:
-    return PyUnicode_FromString("unevaluated");
+  case nix::nExternal:
+    return PyUnicode_FromString("<unevaluated>");
 
-  case nix::tFloat:
+  case nix::nThunk:
+    return PyUnicode_FromString("<thunk>");
+
+  case nix::nFunction:
+    return PyUnicode_FromString("<function>");
+
+  case nix::nFloat:
     return PyFloat_FromDouble(v.fpoint);
 
   default:
